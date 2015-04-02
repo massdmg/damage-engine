@@ -1,0 +1,206 @@
+# Code Style
+
+    //
+    // This class demonstrates an effective, readable style for PHP. It 
+    // includes:
+    //   - descriptive, PascalCase noun phrases for class names
+    //   - snake_case for everything else, to minimize visual noise from
+    //     competing naming conventions (PHP is a snake_case langauge)
+    //   - functionality-summarizing verb clauses for function names
+    //   - bracing down the left, where it is easily visible and helps
+    //     communicate structure
+    //   - indenting that follows bracing, to ensure human and compiler 
+    //     always see the same structure
+    //   - spaces, not tabs, to ensure every reader sees what you wrote
+    
+    class StyleDemonstration
+    {
+      function demonstrate_the_style( $a_number, $a_string = null )
+      {
+        //
+        // Use columnation where vertical structure aids skimming.
+    
+        $a_number > 20    or $a_number += 41;
+        empty($a_string) and $a_string  = "default string";
+
+        // 
+        // Keep the braces on the left, where they are easy to spot and
+        // verify. Indent if you use bracing. 2 spaces is a good indent 
+        // in PHP.
+    
+        while( $a_number % 7 != 1 ) 
+        {
+          var_dump($a_number);
+          $a_number -= 1;
+        }
+      
+        //
+        // Don't indent when you don't brace: it invites hard-to-find bugs.
+      
+        if( $a_number == 8 ) return "tilt!";
+    
+        //
+        // Comment every major block at the top with a summary of the meaning.
+        // It helps skimming and provides a checksum when you aren't sure the
+        // code you are reading is working as intended.
+    
+        var_dump($a_string);
+        return $a_number * strlen($a_string);
+      }
+    }
+
+
+# Coding Guidelines
+
+## Classes
+
+* Classes embody things. Name them using nouns and noun-phrases that describe what the class embodies.
+* Write class names in PascalCase. 
+* Avoid overloaded and overly-abstract words.
+* If you find yourself wanting to use a verb as a class name, think carefully about your design.
+* Do not build singleton classes (classes that expect to have only one instance in memory). Requirements change, and your design will almost inevitably break.
+* Do not ever write static methods that talk to a singleton instance. Cement has no place in software.
+
+## Functions
+
+* Functions do things. Start function names with a verb. Include enough words to describe the major behaviours. A good function name should save your team members from having to read your function definition, nine times out of ten. 
+* Write function names in snake_case.
+* If your function calls exit, make it clear in the name. 
+
+## Commenting
+
+* Nearly every function deserves a comment block that expands on the function name with additional detail, that describes the expected range of its inputs, that describes the type and content of its return (and any exceptions it throws), and that describes any special behaviours the function may have.
+* Nearly every block of code within a function deserves a comment that summarizes what is to follow. Such summaries help readers quickly find what they are looking for, and act as a checksum when the code doesn't seem to be doing what the reader expects.
+* Nearly every non-trivial block of code deserves a detailed comment block that discusses design goals, reasoning, features, and gotchas.
+* Mark every design limitation or expedient choice with a comment that starts with the uppercase word BUG or TODO. 
+* If you can't explain a complex operation concisely in a comment, chances are good the code should be redesigned.
+* Write your comments while you are writing your code. When you alter code, alter the comments to match.
+
+## Other
+
+* If you are working in an existing file, either match its style or reformat it entirely. Do not ever mix different code styles in a single file.
+* If you comment out a block of code, sign and date it. Explain why you did it. Ensure that the next person who happens across it isn't left wondering why the code is still there or how long it's been like that.
+
+
+# Design Principles
+
+## Orthogonal Design
+
+Separate things should be kept separate. Low-level classes should not contain business logic. Business logic classes should not be cluttered up with low-level details (of HTTP, database result iteration, etc.). Focus on one problem at a time. Move common code to a common place, where it can be tested and left alone. Make sure your code can work in text, JSON, and HTML contexts. Do not embed constants in your logic.
+
+The ultimate goal is to be able to re-use the platform for new games. If nothing else, consider that eventuality when deciding where a routine belongs.
+
+
+## Refactor constantly
+
+If you notice old design ideas that are becoming increasingly messy to maintain, rework them: chances are good that the old design is now hindering more than it helps.
+
+If you find yourself adding a third (or, sometimes, even a second) copy of some code, pull it out and put it in a common function, method, or class. What if the original copy had a bug? Will you remember to correct it in all of the places you propagated it? Do you want to have to read every line of every copy you come across to find out whether somebody did or not? 
+
+*Cut* and paste is a good thing; *copy* and paste is not.
+
+
+## Don't require manual intervention
+
+Don't write systems that have to be babysat. If your code needs something from the cache and doesn't find it there, be prepared to build it. If cached data can change, ensure you turnover the cached version from time to time. Very few objects should live in the cache for more than a day; if reloading them at least that often would kill the game, fix it.
+
+It's bad enough to have to regularly poke the running system. It's *far worse* if you only have to do it occasionally—because chances are good, the knowledge of how and when to do it will have been forgotten by the time the problem comes up.
+
+This goes for test cases, too. Ideally, we should be able to run continuous integration testing directly out of the code repository. Ensuring the test environment doesn't require manual intervention is the only way to make that possible.
+
+
+## Think about debugging
+
+When writing code, regularly ask yourself how you are going to debug a problem that only happens in production. Production environments are always more complex than test environments. You can't make the environment perfect for debugging, but you can probably do things to ensure at least some debugging can be done. A silent script is a deadly script. Don't write them. If you realize you already have, do something about it.
+
+
+## Keep caching simple
+
+Caches are where PHP scripts get complicated: when you cache something in one script that will be used in another, you are creating coordination issues. Generally, don't put complex objects in the cache. The simpler the data there, the less trouble you will have with it. 
+
+Caches don't play nicely with class hierarchies: you can't be sure who is going to put the data into the cache, so you can't be sure what you are going to get out of it. An older script may put something into the cache that isn't adequate to a newer script's needs. And a newer script may put something into the cache that an older script doesn't have a definition for. In the former case, the newer script may fail from bad assumptions. In the latter case, the older script will fail from a PHP error. 
+
+Caches don't play nicely with objects at all, to be frank. Cached objects bypass constructors when loaded. Any recent changes in the definition may well not be represented in the loaded state. Bad things will result.
+
+Keep cached data in simple forms that won't have these issues. Use stale dates, and be sure you get what you asked for. Always.
+
+
+
+# Rationale
+
+## Formatting
+
+THISISWHATWRITTENTEXTUSEDOTLOOKLIKEATHOUSANDYEARSAGOBEFOREWEINVENTEDLOWERCASECHARACTERSSPACINGANDPUNCTUATIONTHELONGERTHEPIECEGETSTHEHARDERITISFORTHEEYETODISTINGUISHWORDSFROMEACHOTHERANDTHEHARDERITISTOUNDERSTANDTHESTRUCTUREOFWHATWEAREREADINGUNLIKESPEAKINGREADINGANDWRITINGARENOTNATURALPROCESSESFORUSTHATISWHYTHEYTAKESOLONGTOLEARNIMAGINEREADINGPAGEAFTERPAGEOFTHISWITHNOTHINGTODEMARCATEINDIVIDUALTHOUGHTSWITHNOPLACEYOUREYECANGOFORABREAK
+
+How easy was that for you to read? Did you notice the spelling mistake in the first line?
+
+The simple truth is that formatting matters. We invented lower case characters because, by having variation in heights and widths, the eye can more easily pick out necessary details, making reading much faster. We put in spacing to group letters into words. We developed punctuation to help shape the words into nuanced structures. We invented indent and vertical spacing to group related sentences into paragraphs and other larger-scale structures. We limited upper case letters to the start of sentences and proper nouns in order to help them stand out from the flow of the text—to create landmarks that made it easier to track from line to line, and to pick out important places within the text where we needed to pay closer attention.
+
+There's a lot of thought and design that has built up in our system of writing. There are numerous reasons most printed texts look the way they do—reasons most people never think about. But the truth is we have a literate society at least in part because we applied techniques to make the written word more accessible.
+
+We need to make the same kinds of design choices in our code.
+
+
+### Bracing on the left; indenting follows bracing
+
+The Western eye reads structure from indentation, down the left of the page. PHP reads structure from curly braces in the code. Therefore, in order to bring these two approaches into one consistent form, all braces must appear on the left side of the page, with appropriate indenting of the contained code, as follows:
+
+    if( $an_object->call_a_method() )
+    {
+      $stuff = do_something($value);
+      $such  = check_valid($stuff);
+      
+      if( $stuff > 10 || $such )
+      {
+        $an_object->commit_changes();
+      }
+    }
+    
+This style makes it trivial to spot missing braces and other issues that will cause a disconnect between the human and compiler interpretations of the code.
+
+For similar reasons, single statement ifs and loops must either appear on one line, or braced across several. Do not use indent without bracing. There are few harder bugs to spot in a sea of code than the following:
+
+    if ($that_flag)
+      dump_a_message();
+      exit;
+    if ($this->has_finished){
+      print "fun stuff";
+      error_log("everything's okay");
+    }
+            
+Well, unless it's this one:
+
+    if ($that_flag){
+      do_something();
+    }
+    
+    if ($this->has_property($property) && ($debugFlag || ($zig && !$zag)))
+      dump_a_message();
+      exit;
+    }
+    
+    while ($object->space_left()){
+      $object->do_it_once();
+    }
+
+Particularly when the compiler is telling you the error is somewhere else. Or, worse, isn't telling you anything at all.
+
+
+### Spaces, not tabs
+
+Hard tabs are not reliable purveyors of formatting, and so should not be used in formatted code. There is little point carefully formatting your code to maximize communication if you do it with markers that can change width on another display. 
+
+In English, fixed-width fonts are demonstrably harder and slower to read than proportional fonts, but we all prefer them for code. There's a reason: the regular spacing helps the eye track across the symbol-rich lines and to follow easily the vertical patterns in the code. Hard tabs are not fixed-width. They have no place in code.
+
+In PHP, 2 spaces is the optimal indent, as it makes embedded HTML both more readable and more transfer-efficient, while still providing sufficient structure to the eye when reading straight PHP code.
+
+
+### snake_case, not camelCase
+
+PHP has a vast API, and nearly all of it is built using snake_case names. In fact, until very recently, PHP converted *all* names to lower case during parsing. The simple truth is that PHP is a snake_case langauge. Mixing in camelCase variableAndFunctionNames needlesslyReducesTheReadability of the language. By constantlyChangingThe typical spacing and capitalizationOfWords, the eye has to word harder to group letters into words, and words into statements. You are forced to read linearly. It slows you down.
+
+There are languages (like Objective-C and Java) where camelCase is a necessary evil, due to the decisions of the original designers. PHP is not one of those languages.
+
+
+
+
